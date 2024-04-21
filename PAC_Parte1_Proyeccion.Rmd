@@ -1,0 +1,260 @@
+---
+title: "Proyeccion"
+author: "Grupo No4"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: 
+    toc: true
+    fig_caption: true
+  html_document: 
+    toc: true
+    toc_float: true
+    fig_caption: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Install and load necessary packages
+if (!require("readxl")) install.packages("readxl")
+if (!require("ggplot2")) install.packages("ggplot2")
+if (!require("dplyr")) install.packages("dplyr")
+library(readxl)
+library(ggplot2)
+library(dplyr)
+```
+# Set working directory
+```{r }
+# Set working directory
+setwd("D:/1.Maestria Ciencia Datos/03. INTRODUCCIÓN A LOS MODELOS ESTADÍSTICOS-23MCDAP002-PSMA-00609-1926-202302/Avance1-PA/2024.04.20")
+# Importing the dataset
+data <- read_excel("FINAL TOTAL.xlsx", sheet = "Proyección")
+# Drop the last row
+data <- data[-nrow(data), ]
+
+#Head
+head(data)
+
+# Rename specific columns using dplyr's rename() function
+data <- data %>%
+  rename(
+    FSiembra = `Fecha de Siembra`,
+    PlantasxHa = `Plantas por Ha`,
+    PlantasxLt = `Plantas por Lote`,
+    FrutosxPl = `Frutos por Planta`,
+    PesoPromFr = `Peso Promedio Fruto`,
+    KgBrutoxHa = `Kg Bruto Ha`,
+    KgBrutoxLt = `Kg Bruto Lote`,
+    KgExpxLt = `Kg Exportado Lote`,
+    KgExpxHa = `Kg Exportado Ha`,
+    # Continue renaming as needed
+  )
+#Names
+colnames(data)
+#STR
+str(data)
+
+# Check for missing data
+sum(is.na(data))
+
+colnames(data)
+# Basic summary statistics
+summary(data)
+
+numeric_columns <- sapply(data, is.numeric)
+data_numeric <- data[, numeric_columns]
+
+print(numeric_columns)
+
+print(data_numeric)
+
+
+# Generating histograms
+lapply(names(data_numeric), function(x) {
+  ggplot(data, aes_string(x = x)) +
+    geom_histogram(alpha=0.45, bins = 30, fill = "red", color = "black") +
+    labs(title = paste("Distribución de", x))
+})
+
+names(data)
+
+names(data_numeric)
+##########################################
+# Configurar tamaño del gráfico
+options(repr.plot.width=12, repr.plot.height=6)
+# Crear el boxplot
+boxplot <- ggplot(data, aes(x = Fundo, y = KgExpxHa, fill = Fundo)) +
+  geom_boxplot() +
+  labs(title = "Boxplots por Fundo")
+# Establecer la ubicación de la leyenda
+boxplot <- boxplot + theme(legend.position = "bottom")
+# Mostrar el boxplot
+print(boxplot)
+##########################################
+names(data)
+
+# Crear los boxplots
+boxplot <- ggplot(data, aes(x = Area, y = KgExpxHa, fill = Fundo)) +
+  geom_boxplot() +
+  labs(title = "Boxplots por Fundo") +
+  facet_wrap(~Variedad)  # Cambia "Otra_Variable" por el nombre de la variable que deseas usar para dividir los paneles
+# Establecer la ubicación de la leyenda
+boxplot <- boxplot + theme(legend.position = "bottom")
+# Mostrar los boxplots
+print(boxplot)
+
+# Correlation matrix (if applicable)
+# Install the 'corrplot' package if not already installed
+if (!require("corrplot")) install.packages("corrplot")
+library(corrplot)
+correlation_matrix <- cor(data_numeric, use = "pairwise.complete.obs")
+corrplot(correlation_matrix, method = "circle", type = "upper", #order = "hclust",
+         tl.col = "black",  # text label color
+         tl.srt = 45,       # text label rotation in degrees
+         addCoef.col = "black", # color of the correlation coefficients
+         number.cex = 0.7,  # size of the correlation coefficients
+         cl.cex = 0.7,      # size of the color legend text
+         cl.ratio = 0.1     # ratio of the color legend size
+)
+
+colnames(data_numeric)
+colnames(data)
+
+### 
+ggplot(data, aes(x = Area, y = KgExpxHa)) +
+  geom_point() +
+  facet_grid(Fundo ~ Variedad) +  # Creates a grid of plots by Variedad and Color
+  labs(title = "Exploration of Kg Exportado Lote by Variedad and Color",
+       x = "Eje X",
+       y = "Eje Y") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Using facet_wrap to explore the same data but with a single wrapping variable
+ggplot(data, aes(x = Area, y = KgExpxHa)) +
+  geom_point() +
+  facet_wrap(~ Fundo + Variedad, scales = "free") +
+  labs(title = "Exploration of Kg Exportado Lote by Variedad and Color",
+       x = "Area (Hectares)",
+       y = "Kg Exportado Lote") +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Ahora exportar después de cambiar el directorio
+write.csv(data, "my_data.csv", row.names = FALSE)
+
+# Lineas
+data$Fundo <- as.factor(data$Fundo)
+data$Area <- as.numeric(data$Area)
+data$KgExpxHa <- as.numeric(data$KgExpxHa)
+# Crear el gráfico de líneas
+ggplot(data, aes(x=Area, y=KgExpxHa, color=Fundo, group=Fundo)) +
+  geom_line() +
+  geom_point() +  # Agregar puntos para mejor visualización de los datos
+  labs(title="Relación entre Área y Kg Exportados por Ha por Fundo",
+       x="Área (ha)", y="Kg Exportados por Ha") +
+  scale_color_viridis_d() +  # Usar una paleta de colores para diferenciar los Fundos
+  theme_minimal()  # Tema minimalista
+
+#Sectores
+# Preparar los datos sumando o promediando KgExpxHa por Fundo
+data_summary <- data %>%
+  group_by(Fundo) %>%
+  summarize(Total_KgExpxHa = sum(KgExpxHa, na.rm = TRUE))  # Utilizar sum() o mean() según el caso
+
+# Crear el gráfico de sectores
+ggplot(data_summary, aes(x="", y=Total_KgExpxHa, fill=Fundo)) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +  # Convertir el gráfico de barras a un gráfico circular
+  theme_void() +  # Eliminar elementos del gráfico no necesarios
+  labs(title="Distribución de Kg Exportados por Ha por Fundo") +
+  scale_fill_viridis_d()  # Usar una paleta de colores
+######
+library(scales)  # Para el formateo de los porcentajes
+# Preparar los datos sumando KgExpxHa por Fundo
+data_summary <- data %>%
+  group_by(Fundo) %>%
+  summarize(Total_KgExpxHa = sum(KgExpxHa, na.rm = TRUE)) %>%
+  mutate(Percentage = Total_KgExpxHa / sum(Total_KgExpxHa) * 100)  # Calcular el porcentaje
+# Función para generar una paleta de colores pastel
+pastel <- function(colours = 5) {
+  hues = seq(15, 375, length = colours + 1)
+  hcl(h = hues, l = 85, c = 65)[1:colours]
+}
+
+# Crear el gráfico de sectores con porcentajes
+ggplot(data_summary, aes(x="", y=Total_KgExpxHa, fill=Fundo)) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +
+  theme_void() +
+  labs(title="Distribución de Kg Exportados por Ha por Fundo") +
+  scale_fill_manual(values = pastel(colours = length(unique(data$Fundo)))) +  # Colores pastel
+  geom_text(aes(label = paste0(round(Percentage, 1), "%")), position = position_stack(vjust = 0.5))  # Agregar etiquetas de porcentaje
+
+### ANOVA ###
+# Ensure that 'Fundo' is a factor and 'KgExpxHa' is numeric
+data$Fundo <- as.factor(data$Fundo)
+data$KgExpxHa <- as.numeric(data$KgExpxHa)
+# ANOVA to compare 'KgExpxHa' across different 'Fundo'
+anova_result <- aov(KgExpxHa ~ Fundo, data = data)
+# Check the summary of the ANOVA
+summary(anova_result)
+# Check for assumptions: Normality
+qqnorm(residuals(anova_result))
+qqline(residuals(anova_result))
+# Homogeneity of variances
+plot(residuals(anova_result) ~ fitted(anova_result))
+# If ANOVA is significant, conduct post-hoc tests
+TukeyHSD(anova_result)
+
+## ANOVA #2
+# Convert 'Fundo' to a factor if necessary
+data$Fundo <- as.factor(data$Fundo)
+
+# Boxplot for 'KgExpxHa' across different 'Fundo'
+ggplot(data, aes(x=Fundo, y=KgExpxHa)) +
+  geom_boxplot() +
+  labs(title="Boxplot of KgExpxHa Across Fundo", x="Fundo", y="KgExpxHa")
+
+# Performing the ANOVA
+anova_result <- aov(KgExpxHa ~ Fundo, data = data)
+
+# Residual plot
+res_data <- data.frame(residuals= residuals(anova_result), fitted=fitted(anova_result))
+ggplot(res_data, aes(x=fitted, y=residuals)) +
+  geom_point() +
+  geom_smooth(method="lm", se=FALSE) +
+  labs(title="Residual vs Fitted Plot for ANOVA", x="Fitted values", y="Residuals")
+
+# QQ plot of residuals
+ggplot(res_data, aes(sample=residuals)) +
+  geom_qq() +
+  geom_qq_line() +
+  labs(title="QQ Plot of Residuals")
+####################################
+
+
+# Create a pairwise scatter plot
+library(GGally)
+# Increase the cardinality threshold
+ggpairs(data, cardinality_threshold = 35)
+ggpairs(data_numeric, cardinality_threshold = 35)
+p <- ggpairs(data, cardinality_threshold = 35)
+# Save the plot with ggsave
+ggsave("ggpairs_plot_.png", plot = p, width = 30, height = 30, dpi = 600)
+
+
+```
+
+
+
+### Notas:
+
+1. **Packages**: Ensure you have the necessary R packages (`readxl`, `ggplot2`, `dplyr`) installed. If not, you can install them using `install.packages()`.
+
+This markdown script provides a structure for conducting an EDA with visualizations, and you can further expand upon this as needed.
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+

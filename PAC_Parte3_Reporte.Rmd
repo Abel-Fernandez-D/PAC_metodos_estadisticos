@@ -1,0 +1,264 @@
+---
+title: "Reporte"
+author: "Grupo No4"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: 
+    toc: true
+    fig_caption: true
+  html_document: 
+    toc: true
+    toc_float: true
+    fig_caption: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Install and load necessary packages
+if (!require("readxl")) install.packages("readxl")
+if (!require("ggplot2")) install.packages("ggplot2")
+if (!require("dplyr")) install.packages("dplyr")
+library(readxl)
+library(ggplot2)
+library(dplyr)
+```
+# Set working directory
+```{r }
+# Set working directory
+setwd("D:/1.Maestria Ciencia Datos/03. INTRODUCCIÓN A LOS MODELOS ESTADÍSTICOS-23MCDAP002-PSMA-00609-1926-202302/Avance1-PA/2024.04.20")
+# Importing the dataset
+data <- read_excel("FINAL TOTAL.xlsx", sheet = "Reporte")
+# Drop the last row
+data <- data[-nrow(data), ]
+
+#Head
+head(data)
+names(data)
+
+# Rename specific columns using dplyr's rename() function
+data <- data %>%
+  rename(
+    NoGR = `N° Guia de Remisión`,
+    NoRepProd = `N° Reporte de Producción`,
+    TotJabas = `Total Jabas`,
+    PesoPromJkg = `Peso Promedio Jaba (Kg)`,
+    CajasExp10kg = `Cajas  Exportadas (10 Kg)`,
+    IngPakBrkg = `Ingreso Packing (Kg Bruto)`,
+    KgExp = `Kg Exportados`,
+    Perc_Exp = `% Exportado`,
+    KgDesc = `Kg Descarte`,
+    Perc_Desc = `% Descarte`,
+    KgMerm = `Kg Merma`,
+    Perc_Merm = `% Merma`,
+    KgDescCamp = `Kg Descarte de Campo`,
+    KgBruLt = `Kg Brutos Lote`,
+    KgBruHa = `Kg Brutos Ha`,
+    KgExpHa = `Kg Exportado Ha`,
+    Cliente = `CLIENTE`,
+    TempProm = `TEMP PROM`,
+    TempMax = `TEMP. MAX`,
+    TempMin = `TEMP. MIN`,
+    HumProm = `HUM. PROM`,
+    HumMax = `HUM. MAX`,
+    HumMin = `HUM. MIN`,
+    ETAcum = `ET ACUMULADA`,
+    Producto = `PRODUCTO`,
+    Naturaleza = `NATURALEZA`,
+    DosisLtxHa = `DOSIS - L/HA`,
+    Tipo = `TIPO`,
+    # Continue renaming as needed
+  )
+#Names
+colnames(data)
+#STR
+str(data)
+
+# Check for missing data
+sum(is.na(data))
+
+colnames(data)
+# Basic summary statistics
+summary(data)
+
+numeric_columns <- sapply(data, is.numeric)
+data_n <- data[, numeric_columns]
+print(numeric_columns)
+
+library(rlang)  # for the sym() function
+# Generating histograms using aes() with tidy evaluation
+lapply(names(data_n), function(x) {
+  ggplot(data, aes(x = !!sym(x))) +  # Use tidy evaluation to interpret x
+    geom_histogram(alpha = 0.25, bins = 30, fill = "green", color = "black") +
+    labs(title = paste("Distribución de", x))
+})
+
+
+names(data)
+names(data_n)
+##########################################
+# Configurar tamaño del gráfico
+options(repr.plot.width=18, repr.plot.height=6)
+# Crear el boxplot
+boxplot <- ggplot(data, aes(x = Cliente, y = KgBruLt, fill = Cliente)) +
+  geom_boxplot() +
+  labs(title = "Boxplots por Cliente")
+boxplot <- boxplot + theme(legend.position = "bottom")# Establecer la ubicación de la leyenda
+print(boxplot) # Mostrar el boxplot
+
+
+# Crear el boxplot
+boxplot <- ggplot(data, aes(x = Semana, y = KgBruLt, fill = Cliente)) +
+  geom_boxplot() +
+  labs(title = "Boxplots por Semana")
+# Establecer la ubicación de la leyenda
+boxplot <- boxplot + theme(legend.position = "bottom")
+# Mostrar el boxplot
+print(boxplot)
+
+##########################################
+names(data)
+
+#1 Crear los boxplots
+boxplot <- ggplot(data, aes(x = Naturaleza, y = KgBruLt, fill = Cliente)) +
+  geom_boxplot() +
+  labs(title = "Boxplots por Semana") +
+  facet_wrap(~Semana)  # Cambia "Otra_Variable" por el nombre de la variable que deseas usar para dividir los paneles
+# Establecer la ubicación de la leyenda
+boxplot <- boxplot + theme(legend.position = "bottom")
+# Mostrar los boxplots
+print(boxplot)
+
+#2 Crear los boxplots
+options(repr.plot.width=15, repr.plot.height=5) # Tamaño original
+boxplot <- ggplot(data, aes(x = Fundo, y = KgBruLt, fill = Cliente)) +
+  geom_boxplot() +
+  labs(title = "Boxplots por Fundo") +
+  facet_wrap(~Semana)+# Cambia "Otra_Variable" por el nombre de la variable que deseas usar para dividir los paneles
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Girar los labels del eje x 90 grados
+# Establecer la ubicación de la leyenda
+boxplot <- boxplot + theme(legend.position = "bottom")
+# Mostrar los boxplots
+print(boxplot)
+
+#2.2 Crear los boxplots
+options(repr.plot.width=15, repr.plot.height=5) # Tamaño original
+boxplot <- ggplot(data, aes(x = DosisLtxHa, y = KgBruLt, fill = Cliente)) +
+  geom_boxplot() +
+  labs(title = "Boxplots por DosisLtxHa") +
+  facet_wrap(~Semana)+# Cambia "Otra_Variable" por el nombre de la variable que deseas usar para dividir los paneles
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Girar los labels del eje x 90 grados
+# Establecer la ubicación de la leyenda
+boxplot <- boxplot + theme(legend.position = "bottom")
+# Mostrar los boxplots
+print(boxplot)
+
+#3 Crear los boxplots
+options(repr.plot.width=15, repr.plot.height=5) # Tamaño original
+boxplot <- ggplot(data, aes(y = Tipo, x = KgBruLt, fill = Cliente)) +
+  geom_boxplot() +
+  labs(title = "Boxplots por Tipo Dosis") +
+  facet_wrap(~Naturaleza) + # Cambia "Otra_Variable" por el nombre de la variable que deseas usar para dividir los paneles
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Girar los labels del eje x 90 grados
+  coord_flip() # Esto gira el gráfico para que los boxplots sean horizontales
+# Establecer la ubicación de la leyenda
+boxplot <- boxplot + theme(legend.position = "bottom")
+# Mostrar los boxplots
+print(boxplot)
+
+# Correlation matrix (if applicable)
+# Install the 'corrplot' package if not already installed
+if (!require("corrplot")) install.packages("corrplot")
+library(corrplot)
+correlation_matrix <- cor(data_n, use = "pairwise.complete.obs")
+corrplot(correlation_matrix, method = "circle", type = "upper", #order = "hclust",
+         tl.col = "black",  # text label color
+         tl.srt = 45,       # text label rotation in degrees
+         addCoef.col = "black", # color of the correlation coefficients
+         number.cex = 0.35,  # size of the correlation coefficients
+         cl.cex = 0.3,      # size of the color legend text
+         tl.cex = 0.4,
+         cl.ratio = 0.2     # ratio of the color legend size
+)
+colnames(data)
+colnames(data_n)
+
+##
+library(ggplot2)
+library(RColorBrewer)
+# Definir una paleta de colores pastel
+colors <- brewer.pal(n = 8, name = "Pastel1")
+# Gráfico ggplot con diseño mejorado y colores pastel
+ggplot(data, aes(x = Ha, y = KgBruHa, color = Cliente)) +
+  geom_point(size = 2, alpha = 0.8) +  # Ajustar tamaño y transparencia de los puntos
+  scale_color_manual(values = colors) +  # Usar colores pastel definidos
+  facet_grid(Cliente ~ Naturaleza) +  # Rejilla de gráficos por Cliente y Naturaleza
+  labs(title = "KgBruHa vs Ha // ",
+       x = "Eje X",
+       y = "Eje Y") +
+  theme_bw() +  # Tema con fondo blanco
+  theme(
+    plot.title = element_text(face = "bold", color = "#333333", size = 14, hjust = 0.5),
+    axis.title = element_text(face = "bold", color = "#666666"),
+    axis.text.x = element_text(angle = 45, hjust = 1, color = "#333333"),  # Girar y ajustar texto del eje X
+    axis.text.y = element_text(color = "#333333"),
+    legend.title = element_text(face = "bold"),
+    legend.background = element_rect(fill = "gray90"),
+    legend.position = "bottom",  # Mover la leyenda al fondo
+    panel.grid.major = element_blank(),  # Eliminar las líneas de la rejilla principales
+    panel.grid.minor = element_blank(),  # Eliminar las líneas de la rejilla secundarias
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 1)  # Cambiar 'size' a 'linewidth'
+  )
+
+##
+# Ahora exportar después de cambiar el directorio
+write.csv(data, "my_datar.csv", row.names = FALSE)
+names(data_n)
+### ANOVA ###
+# Ensure that 'Fundo' is a factor and 'KgExpxHa' is numeric
+data$Semana <- as.factor(data$Semana)
+data$KgBruHa <- as.numeric(data$KgBruHa)
+# ANOVA to compare 'KgExpxHa' across different 'Fundo'
+anova_result <- aov(KgBruHa ~ Semana, data = data)
+# Check the summary of the ANOVA
+summary(anova_result)
+# Check for assumptions: Normality
+qqnorm(residuals(anova_result))
+qqline(residuals(anova_result))
+# Homogeneity of variances
+plot(residuals(anova_result) ~ fitted(anova_result))
+# If ANOVA is significant, conduct post-hoc tests
+TukeyHSD(anova_result)
+
+## ANOVA #2
+names(data)
+# Performing the ANOVA
+anova_result <- aov(KgBruHa ~ DosisLtxHa, data = data)
+
+# Residual plot
+res_data <- data.frame(residuals= residuals(anova_result), fitted=fitted(anova_result))
+ggplot(res_data, aes(x=fitted, y=residuals)) +
+  geom_point() +
+  geom_smooth(method="lm", se=FALSE) +
+  labs(title="Residual vs Fitted Plot for ANOVA", x="Fitted values", y="Residuals")
+
+# QQ plot of residuals
+ggplot(res_data, aes(sample=residuals)) +
+  geom_qq() +
+  geom_qq_line() +
+  labs(title="QQ Plot of Residuals")
+
+```
+
+
+
+### Notas:
+
+1. **Packages**: Ensure you have the necessary R packages (`readxl`, `ggplot2`, `dplyr`) installed. If not, you can install them using `install.packages()`.
+
+This markdown script provides a structure for conducting an EDA with visualizations, and you can further expand upon this as needed.
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+

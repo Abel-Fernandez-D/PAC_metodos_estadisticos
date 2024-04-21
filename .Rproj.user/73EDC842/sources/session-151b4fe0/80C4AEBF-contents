@@ -1,0 +1,6 @@
+if ("usethis" %in% rownames(installed.packages())) {
+  print("El paquete usethis está instalado.")
+} else {
+  print("El paquete usethis no está instalado.")
+}
+
