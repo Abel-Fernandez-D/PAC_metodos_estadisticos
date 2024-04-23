@@ -3,12 +3,12 @@ title: "Reporte"
 author: "Grupo No4"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: 
-    toc: true
-    fig_caption: true
   html_document: 
     toc: true
     toc_float: true
+    fig_caption: true
+  pdf_document: 
+    toc: true
     fig_caption: true
 ---
 
@@ -25,7 +25,7 @@ library(dplyr)
 # Set working directory
 ```{r }
 # Set working directory
-setwd("D:/1.Maestria Ciencia Datos/03. INTRODUCCIÓN A LOS MODELOS ESTADÍSTICOS-23MCDAP002-PSMA-00609-1926-202302/Avance1-PA/2024.04.20")
+setwd("D:/Descargas")
 # Importing the dataset
 data <- read_excel("FINAL TOTAL.xlsx", sheet = "Reporte")
 # Drop the last row
@@ -119,6 +119,7 @@ print(boxplot)
 names(data)
 
 #1 Crear los boxplots
+options(repr.plot.width=18, repr.plot.height=6)
 boxplot <- ggplot(data, aes(x = Naturaleza, y = KgBruLt, fill = Cliente)) +
   geom_boxplot() +
   labs(title = "Boxplots por Semana") +

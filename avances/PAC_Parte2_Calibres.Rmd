@@ -78,7 +78,7 @@ Como paso previo al análisis, se establece el directorio de trabajo adecuado. A
 
 ```{r }
 # Configuración del directorio de trabajo
-setwd("D:/1.Maestria Ciencia Datos/03. INTRODUCCIÓN A LOS MODELOS ESTADÍSTICOS-23MCDAP002-PSMA-00609-1926-202302/Avance1-PA/2024.04.20")
+setwd("D:/Descargas")
 
 # Importando el conjunto de datos
 data <- read_excel("FINAL TOTAL.xlsx", sheet = "Calibres")
